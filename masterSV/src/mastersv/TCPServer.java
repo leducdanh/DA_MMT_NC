@@ -77,20 +77,13 @@ public class TCPServer {
                                 Config.WriteLstFile();
                                 System.out.println(line);
                             } else {
-                                oos.writeObject("client");
-                                String reqFileName = (String) ois.readObject();
-                                for (String nameFile : LstFile) {
-                                    if (nameFile.split(">>>")[1].equals(reqFileName)) {
-                                        oos.writeObject(nameFile.split(">>>")[0]);
-                                        break;
-                                    }
-                                }
-                                System.out.println(reqFileName);
+                                oos.writeObject(LstFile);
+
                             }
                         } catch (IOException ex) {
-                            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
+                            System.err.println(ex);
                         } catch (ClassNotFoundException ex) {
-                            Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
+                            System.err.println(ex);
                         }
                     }
 
@@ -100,7 +93,6 @@ public class TCPServer {
             }
         } catch (IOException e) {
             System.out.println(e);
-            e.printStackTrace();
         }
     }
 }

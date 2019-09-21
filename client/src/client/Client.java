@@ -11,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +28,7 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Scanner;
 
 /**
  *
@@ -34,54 +36,30 @@ import java.util.Properties;
  */
 public class Client {
 
-    private DatagramSocket clientSocket;
+    private static DatagramSocket ClientSocket;
     private DatagramPacket sendPacket, receivePacket;
     private InputStream inStream = null;
-    private String checkSumValue;
     private InetAddress addr;
-
-    public Client() throws SocketException, UnknownHostException, IOException {
-//        this.addr = InetAddress.getByName("localhost");
-        this.clientSocket = new DatagramSocket(12345);
-        byte[] buf = new byte[1024];
-        this.receivePacket = new DatagramPacket(buf, 1024);
-        byte[] receiveByte = this.receivePacket.getData();
-        String str = new String(receiveByte, 0, this.receivePacket.getLength());
-        System.out.println(str);
-    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
-        ////////////////Connect MasterSV/////////////////
-        // ip master.
-//        final String serverHost = "localhost";
         final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
-        
+
         String IpAndPortFileSV = "";
         ArrayList<String> lstFIle = new ArrayList<String>();
 
         try {
-            // request to 'localhost' port 9999.
-//            socketOfClient = new Socket(serverHost, 9999);
             socketOfClient = new Socket(serverHost, 9859);
 
             ObjectOutputStream oos = new ObjectOutputStream(socketOfClient.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socketOfClient.getInputStream());
-            
+
             oos.writeObject("client");
             lstFIle = (ArrayList<String>) ois.readObject();
-            System.out.println(lstFIle);
-//            String rep = (String) ois.readObject();
-//            if (rep.equals("client")) {
-//                oos.writeObject("txt2.txt");
-//                IpAndPortFileSV = (String) ois.readObject();
-//                System.out.println(IpAndPortFileSV);
-//            }
-
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + serverHost);
             return;
@@ -92,57 +70,68 @@ public class Client {
 
         ///////////////////////////////////////////////
         //create socket client
-        DatagramSocket ClientSocket = new DatagramSocket();
+        ClientSocket = new DatagramSocket();
         System.out.println("Connected to File server");
 
-        //nhap yeu cau tu nguoi dung
-        DataInputStream inFromUser = new DataInputStream(System.in);
-        int a, b, tong;
-        try {
+        while (true) {
+            int count = 0;
+            for (String item : lstFIle) {
+                String[] tmp = item.split(":");
+                String ip = tmp[0];
+                String port = tmp[1];
+                String nameFile = tmp[2];
 
-            //Khai bao mang byte de chua du lieu gui di server
-            byte outToServer1[];
-            //dia chi may chu
-            InetAddress address = InetAddress.getByName(IpAndPortFileSV.split("-")[0]);
-            // so port
-            int port = Integer.parseInt(IpAndPortFileSV.split("-")[1]);
-            //chuyen kieu du lieu : String -> byte va dua vao mang byte da khai bao o tren
-            outToServer1 = "txt2.txt".getBytes();
-            //lay kich thuoc cua mang
-            int leng1 = outToServer1.length;
-//            int leng2 = outToServer2.length;
-            // tao goi de gui di
-            DatagramPacket toServer1 = new DatagramPacket(outToServer1, leng1, address, port);
-//            DatagramPacket toServer2 = new DatagramPacket(outToServer2, leng2, address, port);
-            // gui goi len server
-            ClientSocket.send(toServer1);
-//            ClientSocket.send(toServer2);
-            //tao goi de nhan du lieu ve
-            byte inFromServer[];
-            inFromServer = new byte[1024];
-
-            String data = "";
-            while (!data.equals("the_end")) {
-                // tao goi nhan du lieu ve
-                DatagramPacket fromServer = new DatagramPacket(inFromServer, 1024);
-                // nhan goi tra ve tu server
-                ClientSocket.receive(fromServer);
-                // dua du lieu tu mang byte vao bien data, lay tu vi tri so 0.
-                data = (new String(fromServer.getData(), 0, fromServer.getLength())).trim();
-
-                System.out.println("Ket Qua :" + data);
+                System.out.println(count + "/ " + nameFile + " | " + ip + ":" + port);
+                count++;
             }
 
-            //in ket qua ra man hinh
-            ClientSocket.close();
+            System.out.print("Nhập số thứ tự file bạn muốn tải: ");
+            Scanner sc = new Scanner(System.in);
+            int num = sc.nextInt();
+            //send size
+            InetAddress inetAddress = InetAddress.getByName(lstFIle.get(num).split(":")[0]);
+            DatagramPacket toServer = new DatagramPacket(lstFIle.get(num).split(":")[2].getBytes(), 
+                                                        lstFIle.get(num).split(":")[2].getBytes().length, 
+                                                        inetAddress, 
+                                                        Integer.parseInt(lstFIle.get(num).split(":")[1])
+                                                );
+            ClientSocket.send(toServer);
 
-        } catch (UnknownHostException e) {
-            System.out.println("Server Not Found");
-            System.exit(1);
-        } catch (IOException e) {
-            System.out.println("Cannot connect to server");
-            System.exit(1);
+            byte inFromClient1[];
+            inFromClient1 = new byte[256];
+
+            DatagramPacket fromServer = new DatagramPacket(inFromClient1, inFromClient1.length);
+            ClientSocket.receive(fromServer);
+            String tmp = (new String(fromServer.getData(), 0, fromServer.getLength())).trim();
+            int size = Integer.parseInt(tmp);
+            System.out.println("size: " + size);
+
+            String receive = "";
+            String line = "";
+            while (!line.equals(">>>@the_end<<<")) {
+                ClientSocket.receive(fromServer);
+                receive += line;
+                line = (new String(fromServer.getData(), 0, fromServer.getLength())).trim();
+            }
+
+            System.out.println(receive);
+            if(receive.length() == size){
+                writeFile("download/" + lstFIle.get(num).split(":")[2], receive);
+            }
+            
+            break;
         }
+
+        ClientSocket.close();
     }
 
+    public static void writeFile(String nameFile, String dataFile){
+        try (
+            FileWriter writer = new FileWriter(nameFile);
+            BufferedWriter bw = new BufferedWriter(writer)) {
+            bw.write(dataFile);
+	} catch (IOException e) {
+            System.err.format("IOException: %s%n", e);
+	}
+    }
 }
