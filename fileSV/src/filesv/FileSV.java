@@ -76,9 +76,10 @@ public class FileSV {
     public final static byte[] BUFFER = new byte[4096]; // Vùng đệm chứa dữ liệu cho gói tin nhận
 
     public static void main(String[] args) throws UnknownHostException, ClassNotFoundException, SocketException, IOException {
-        ///////////////////////connect masterSV/////////////////////////////////////////
+        ///////////////////////connect /////////////////////////////////////////
         // Địa chỉ máy chủ.
-        final String serverHost = "localhost";
+//        final String serverHost = "localhost";
+        final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
         BufferedWriter os = null;
@@ -87,7 +88,8 @@ public class FileSV {
         try {
             // Gửi yêu cầu kết nối tới Server đang lắng nghe
             // trên máy 'localhost' cổng 9999.
-            socketOfClient = new Socket(serverHost, 9999);
+//            socketOfClient = new Socket(serverHost, 9999);
+            socketOfClient = new Socket(serverHost, 9859);
 
             ObjectOutputStream oos = new ObjectOutputStream(socketOfClient.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socketOfClient.getInputStream());
@@ -125,49 +127,10 @@ public class FileSV {
             DatagramPacket fromClient1 = new DatagramPacket(inFromClient1, leng1);
             // nhan goi ve server
             serverSocket.receive(fromClient1);
-            // tao goi de nhan du lieu gui len tu client
-            String fileRequest = (new String(fromClient1.getData(), 0, inFromClient1.length)).trim();
-            System.out.println(fileRequest);
-            ////////////////////////////
-            FileReader fr = new FileReader("Share/" + fileRequest);
-            BufferedReader br = new BufferedReader(fr);
-
-            while (true) {
-                String str = br.readLine();
-                if (str == null) {
-                    str = "the_end";
-                    byte outToClient[];
-                    outToClient = str.getBytes();
-                    //lay kich thuoc mang
-                    leng1 = outToClient.length;
-                    //lay dia chi cua may khach, no nam luon trong goi ma da gui len server
-                    InetAddress address = fromClient1.getAddress();
-                    // lay so port
-                    int port = fromClient1.getPort();
-                    // tao goi de gui ve client
-                    DatagramPacket toClient = new DatagramPacket(outToClient, leng1, address, port);
-                    //gui goi ve client
-                    System.out.println(str);
-                    serverSocket.send(toClient);
-                    break;
-                }
-
-                // dong goi ket qua
-                byte outToClient[];
-                outToClient = str.getBytes();
-                //lay kich thuoc mang
-                leng1 = outToClient.length;
-                //lay dia chi cua may khach, no nam luon trong goi ma da gui len server
-                InetAddress address = fromClient1.getAddress();
-                // lay so port
-                int port = fromClient1.getPort();
-                // tao goi de gui ve client
-                DatagramPacket toClient = new DatagramPacket(outToClient, leng1, address, port);
-                //gui goi ve client
-                System.out.println(str);
-                serverSocket.send(toClient);
-            }
-            fr.close();
+//            fr.close();
+            
+            MyThread th = new MyThread(SERVER_IP, SERVER_PORT, fromClient1, serverSocket);
+            th.start();
             /////////////////////////
         }
     }
