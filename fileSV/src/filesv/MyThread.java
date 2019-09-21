@@ -6,6 +6,7 @@
 package filesv;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -51,7 +52,20 @@ public class MyThread extends Thread {
         FileReader fr = null;
         try {
             fr = new FileReader("Share/" + fileRequest);
+            
+            //send size
+            File f = new File("Share/" + fileRequest);
+            byte outToClient[];
+            outToClient = Long.toString(f.length()).getBytes();
+            InetAddress address = fromClient1.getAddress();
+            // lay so port
+            int port = fromClient1.getPort();
+            // tao goi de gui ve client
+            DatagramPacket toClient = new DatagramPacket(outToClient, outToClient.length, address, port);
+            serverSocket.send(toClient);
         } catch (FileNotFoundException ex) {
+            Logger.getLogger(MyThread.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(MyThread.class.getName()).log(Level.SEVERE, null, ex);
         }
         BufferedReader br = new BufferedReader(fr);
@@ -64,7 +78,7 @@ public class MyThread extends Thread {
                 Logger.getLogger(MyThread.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (str == null) {
-                str = "the_end";
+                str = ">>>@the_end<<<";
                 byte outToClient[];
                 outToClient = str.getBytes();
                 //lay kich thuoc mang

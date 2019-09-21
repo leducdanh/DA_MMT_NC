@@ -45,34 +45,35 @@ public class FileSV {
     private OutputStream ouStream = null;
     private InputStream inStream = null;
 
-    public FileSV() throws SocketException, FileNotFoundException, IOException {
-        InetAddress addr = InetAddress.getByName("localhost");
-        this.serverSocket = new DatagramSocket(12345, addr);
-        //reading file
-        FileReader fr = new FileReader("Share/txt1.txt");
-        BufferedReader br = new BufferedReader(fr);
-        byte[] sendData = new byte[1024];
-        ServerSocket listen = new ServerSocket(12345);
-        Socket s = listen.accept();
-        ouStream = s.getOutputStream();
-
-        while (true) {
-            String Acc = br.readLine();
-            if (Acc == null) {
-                break;
-            }
-            sendData = Acc.getBytes();
-            this.sendpacket = new DatagramPacket(sendData, sendData.length, addr, 12345);
-            this.serverSocket.send(this.sendpacket);
-
-        }
-    }
+//    public FileSV() throws SocketException, FileNotFoundException, IOException {
+//        InetAddress addr = InetAddress.getByName("localhost");
+//        this.serverSocket = new DatagramSocket(12345, addr);
+//        //reading file
+//        FileReader fr = new FileReader("Share/txt1.txt");
+//        BufferedReader br = new BufferedReader(fr);
+//        byte[] sendData = new byte[1024];
+//        ServerSocket listen = new ServerSocket(12346);
+//        Socket s = listen.accept();
+//        ouStream = s.getOutputStream();
+//
+//        while (true) {
+//            String Acc = br.readLine();
+//            if (Acc == null) {
+//                break;
+//            }
+//            sendData = Acc.getBytes();
+//            this.sendpacket = new DatagramPacket(sendData, sendData.length, addr, 12345);
+//            this.serverSocket.send(this.sendpacket);
+//
+//        }
+//    }
 
     /**
      * @param args the command line arguments
-     */
-    public final static String SERVER_IP = "127.0.0.10";
-    public final static int SERVER_PORT = 1024; // Cổng mặc định của Echo Server
+     */ 
+//    public final static String SERVER_IP = "127.0.0.70";
+    public final static String SERVER_IP = "172.19.201.87";
+    public final static int SERVER_PORT = 1027; // Cổng mặc định của Echo Server
     public final static byte[] BUFFER = new byte[4096]; // Vùng đệm chứa dữ liệu cho gói tin nhận
 
     public static void main(String[] args) throws UnknownHostException, ClassNotFoundException, SocketException, IOException {
@@ -82,8 +83,6 @@ public class FileSV {
         final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
-        BufferedWriter os = null;
-        BufferedReader is = null;
 
         try {
             // Gửi yêu cầu kết nối tới Server đang lắng nghe
@@ -99,7 +98,7 @@ public class FileSV {
             if (rep.equals("filescv")) {
                 ArrayList<String> lst = new ArrayList<String>();
                 for (File f : folder.listFiles()) {
-                    lst.add(SERVER_IP + "-" + SERVER_PORT + ">>>" + f.getName());
+                    lst.add(SERVER_IP + ":" + SERVER_PORT + ":" + f.getName());
                 }
                 oos.writeObject(lst);
             }
@@ -114,7 +113,7 @@ public class FileSV {
 
         /////////////////////////////////////////////////////////////////
         // tao ket noi
-        DatagramSocket serverSocket = new DatagramSocket(1024);
+        DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT);
         //thong bao server da san sang ket noi
         System.out.println("Server is now already");
         //tao mang byte de chua du lieu gui len tu client
