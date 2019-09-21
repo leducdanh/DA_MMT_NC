@@ -56,26 +56,31 @@ public class Client {
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         ////////////////Connect MasterSV/////////////////
         // ip master.
-        final String serverHost = "localhost";
+//        final String serverHost = "localhost";
+        final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
         
         String IpAndPortFileSV = "";
+        ArrayList<String> lstFIle = new ArrayList<String>();
 
         try {
             // request to 'localhost' port 9999.
-            socketOfClient = new Socket(serverHost, 9999);
+//            socketOfClient = new Socket(serverHost, 9999);
+            socketOfClient = new Socket(serverHost, 9859);
 
             ObjectOutputStream oos = new ObjectOutputStream(socketOfClient.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socketOfClient.getInputStream());
             
             oos.writeObject("client");
-            String rep = (String) ois.readObject();
-            if (rep.equals("client")) {
-                oos.writeObject("txt2.txt");
-                IpAndPortFileSV = (String) ois.readObject();
-                System.out.println(IpAndPortFileSV);
-            }
+            lstFIle = (ArrayList<String>) ois.readObject();
+            System.out.println(lstFIle);
+//            String rep = (String) ois.readObject();
+//            if (rep.equals("client")) {
+//                oos.writeObject("txt2.txt");
+//                IpAndPortFileSV = (String) ois.readObject();
+//                System.out.println(IpAndPortFileSV);
+//            }
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + serverHost);
@@ -119,7 +124,7 @@ public class Client {
             String data = "";
             while (!data.equals("the_end")) {
                 // tao goi nhan du lieu ve
-                DatagramPacket fromServer = new DatagramPacket(inFromServer, 1023);
+                DatagramPacket fromServer = new DatagramPacket(inFromServer, 1024);
                 // nhan goi tra ve tu server
                 ClientSocket.receive(fromServer);
                 // dua du lieu tu mang byte vao bien data, lay tu vi tri so 0.
