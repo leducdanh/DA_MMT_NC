@@ -45,50 +45,36 @@ public class FileSV {
     private OutputStream ouStream = null;
     private InputStream inStream = null;
 
-//    public FileSV() throws SocketException, FileNotFoundException, IOException {
-//        InetAddress addr = InetAddress.getByName("localhost");
-//        this.serverSocket = new DatagramSocket(12345, addr);
-//        //reading file
-//        FileReader fr = new FileReader("Share/txt1.txt");
-//        BufferedReader br = new BufferedReader(fr);
-//        byte[] sendData = new byte[1024];
-//        ServerSocket listen = new ServerSocket(12346);
-//        Socket s = listen.accept();
-//        ouStream = s.getOutputStream();
-//
-//        while (true) {
-//            String Acc = br.readLine();
-//            if (Acc == null) {
-//                break;
-//            }
-//            sendData = Acc.getBytes();
-//            this.sendpacket = new DatagramPacket(sendData, sendData.length, addr, 12345);
-//            this.serverSocket.send(this.sendpacket);
-//
-//        }
-//    }
-
     /**
      * @param args the command line arguments
-     */ 
+     */
 //    public final static String SERVER_IP = "127.0.0.70";
-    public final static String SERVER_IP = "172.19.201.87";
-    public final static int SERVER_PORT = 1027; // Cổng mặc định của Echo Server
+    public static String SERVER_IP = "";
+    public static int SERVER_PORT; // Cổng mặc định của Echo Server
+    public static String MASTERSERVER_IP = "";
+    public static int MASTERSERVER_PORT; // Cổng mặc định của master Server
     public final static byte[] BUFFER = new byte[4096]; // Vùng đệm chứa dữ liệu cho gói tin nhận
 
     public static void main(String[] args) throws UnknownHostException, ClassNotFoundException, SocketException, IOException {
-        ///////////////////////connect /////////////////////////////////////////
+        ///////////////////////init///////////////////////////
+        FileReader fr = new FileReader("Config.txt");
+        BufferedReader br = new BufferedReader(fr);
+        String str = br.readLine();
+        MASTERSERVER_IP = str;
+        str = br.readLine();
+        MASTERSERVER_PORT = Integer.parseInt(str);
+        str = br.readLine();
+        SERVER_IP = str;
+        str = br.readLine();
+        SERVER_PORT = Integer.parseInt(str);
+///////////////////////connect /////////////////////////////////////////
         // Địa chỉ máy chủ.
-        final String serverHost = "localhost";
-//        final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
 
         try {
             // Gửi yêu cầu kết nối tới Server đang lắng nghe
-            // trên máy 'localhost' cổng 9999.
-            socketOfClient = new Socket(serverHost, 9999);
-//            socketOfClient = new Socket(serverHost, 9859);;
+            socketOfClient = new Socket(MASTERSERVER_IP, MASTERSERVER_PORT);
 
             ObjectOutputStream oos = new ObjectOutputStream(socketOfClient.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socketOfClient.getInputStream());
@@ -104,10 +90,10 @@ public class FileSV {
             }
 
         } catch (UnknownHostException e) {
-            System.err.println("Don't know about host " + serverHost);
+            System.err.println("Don't know about host " + MASTERSERVER_IP);
             return;
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " + serverHost);
+            System.err.println("Couldn't get I/O for the connection to " + MASTERSERVER_IP);
             return;
         }
 
@@ -127,7 +113,7 @@ public class FileSV {
             // nhan goi ve server
             serverSocket.receive(fromClient1);
 //            fr.close();
-            
+
             MyThread th = new MyThread(SERVER_IP, SERVER_PORT, fromClient1, serverSocket);
             th.run();
             /////////////////////////
