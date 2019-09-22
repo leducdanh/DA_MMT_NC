@@ -79,16 +79,16 @@ public class FileSV {
     public static void main(String[] args) throws UnknownHostException, ClassNotFoundException, SocketException, IOException {
         ///////////////////////connect /////////////////////////////////////////
         // Địa chỉ máy chủ.
-//        final String serverHost = "localhost";
-        final String serverHost = "172.19.201.67";
+        final String serverHost = "localhost";
+//        final String serverHost = "172.19.201.67";
 
         Socket socketOfClient = null;
 
         try {
             // Gửi yêu cầu kết nối tới Server đang lắng nghe
             // trên máy 'localhost' cổng 9999.
-//            socketOfClient = new Socket(serverHost, 9999);
-            socketOfClient = new Socket(serverHost, 9859);
+            socketOfClient = new Socket(serverHost, 9999);
+//            socketOfClient = new Socket(serverHost, 9859);;
 
             ObjectOutputStream oos = new ObjectOutputStream(socketOfClient.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socketOfClient.getInputStream());
@@ -129,7 +129,7 @@ public class FileSV {
 //            fr.close();
             
             MyThread th = new MyThread(SERVER_IP, SERVER_PORT, fromClient1, serverSocket);
-            th.start();
+            th.run();
             /////////////////////////
         }
     }
