@@ -102,17 +102,13 @@ public class FileSV {
         DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT);
         //thong bao server da san sang ket noi
         System.out.println("Server is now already");
-        //tao mang byte de chua du lieu gui len tu client
-        byte inFromClient1[];
-        inFromClient1 = new byte[256];
-        // lay kich thuoc mang
-        int leng1 = inFromClient1.length;
-        while (true) {
 
-            DatagramPacket fromClient1 = new DatagramPacket(inFromClient1, leng1);
+        while (true) {
+//tao mang byte de chua du lieu gui len tu client
+            byte inFromClient1[] = new byte[256];
+            DatagramPacket fromClient1 = new DatagramPacket(inFromClient1, 256);
             // nhan goi ve server
             serverSocket.receive(fromClient1);
-//            fr.close();
 
             MyThread th = new MyThread(SERVER_IP, SERVER_PORT, fromClient1, serverSocket);
             th.run();
